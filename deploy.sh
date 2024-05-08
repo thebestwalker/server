@@ -7,22 +7,25 @@ NC='\033[0m' # No Color
 
 # Docker
 install_docker() {
-  echo -e "${GREEN}Установка Docker...${NC}"
-  sudo apt-get update
-  sudo apt-get install ca-certificates curl git
-  sudo install -m 0755 -d /etc/apt/keyrings
-  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-  sudo chmod a+r /etc/apt/keyrings/docker.asc
+  echo -e "${GREEN}Обновление системы и установка необходимых пакетов...${NC}"
+  sudo apt-get update && sudo apt-get install -y ca-certificates curl || { echo -e "${RED}Ошибка при установке пакетов!${NC}"; exit 1; }
 
-  # Add the repository to Apt sources:
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-  sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  echo -e "${GREEN}Добавление GPG ключа Docker...${NC}"
+  sudo mkdir -p /etc/apt/keyrings
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc || { echo -e "${RED}Не удалось загрузить GPG ключ Docker!${NC}"; exit 1; }
+  sudo chmod a+r /etc/apt/keyrings/docker.asc || { echo -e "${RED}Ошибка при установке прав на GPG ключ!${NC}"; exit 1; }
+
+  echo -e "${GREEN}Добавление Docker репозитория в список источников APT...${NC}"
+  # Определение кодового имени версии ОС
+  OS_VERSION_CODENAME=$(. /etc/os-release && echo "$VERSION_CODENAME")
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $OS_VERSION_CODENAME stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null || { echo -e "${RED}Не удалось добавить репозиторий Docker!${NC}"; exit 1; }
+
+  echo -e "${GREEN}Установка Docker CE, Docker CE CLI и Containerd.io...${NC}"
+  sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io || { echo -e "${RED}Ошибка при установке Docker!${NC}"; exit 1; }
+
   echo -e "${GREEN}Docker успешно установлен.${NC}"
 }
-
 # Docker Compose
 install_docker_compose() {
   echo -e "${GREEN}Установка Docker Compose...${NC}"
