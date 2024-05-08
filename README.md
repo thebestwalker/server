@@ -102,3 +102,6 @@ else
 fi
 ```
 
+Фото демонстрация что сайт поднять
+
+![Демонстрация](https://github.com/thebestwalker/server/blob/main/z.png)
